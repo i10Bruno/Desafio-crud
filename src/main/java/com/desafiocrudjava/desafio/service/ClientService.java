@@ -17,7 +17,7 @@ public class ClientService {
 
     @Autowired
     private ClientRepositories clientRepositories;
-
+    @Transactional(readOnly = true)
     public ClientDTO findByid(Long id){
         Optional<Client> result = clientRepositories.findById(id);
         Client client = result.get();
@@ -25,17 +25,13 @@ public class ClientService {
         return new  ClientDTO(client);
 
     }
-
+    @Transactional(readOnly = true)
     public Page<ClientDTO> findAll(Pageable pageable){
         Page<Client> result = clientRepositories.findAll(pageable);
-
         return result.map(x-> new ClientDTO(x));
 
 
     }
-
-
-
 
 
     public ClientDTO insert(ClientDTO dto){
@@ -47,6 +43,23 @@ public class ClientService {
 
 
     }
+    public ClientDTO update (Long id, ClientDTO dto) {
+        Client entity =clientRepositories.getReferenceById(id);
+        CopyEntityToDto(entity, dto);
+        return new ClientDTO(entity);
+
+    }
+
+    public void  delete(Long id){
+        clientRepositories.deleteById(id);
+    }
+
+
+
+
+
+
+
 
     public void CopyEntityToDto (Client entity, ClientDTO dto){
         entity.setName(dto.getName());
