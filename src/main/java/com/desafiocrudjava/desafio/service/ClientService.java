@@ -18,6 +18,25 @@ public class ClientService {
     @Autowired
     private ClientRepositories clientRepositories;
 
+    public ClientDTO findByid(Long id){
+        Optional<Client> result = clientRepositories.findById(id);
+        Client client = result.get();
+
+        return new  ClientDTO(client);
+
+    }
+
+    public Page<ClientDTO> findAll(Pageable pageable){
+        Page<Client> result = clientRepositories.findAll(pageable);
+
+        return result.map(x-> new ClientDTO(x));
+
+
+    }
+
+
+
+
 
     public ClientDTO insert(ClientDTO dto){
 
