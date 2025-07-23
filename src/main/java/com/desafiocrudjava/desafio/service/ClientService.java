@@ -6,6 +6,7 @@ import com.desafiocrudjava.desafio.repositories.ClientRepositories;
 import com.desafiocrudjava.desafio.service.exceptions.DatabaseException;
 import com.desafiocrudjava.desafio.service.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -46,16 +47,18 @@ public class ClientService {
 
         Client entity= new Client();
         CopyEntityToDto(entity, dto);
-
+        entity = clientRepositories.save(entity);
         return  new ClientDTO(entity);
 
 
     }
-    public ClientDTO update (Long id, ClientDTO dto) {
+    @Transactional
+    public ClientDTO update ( Long id, ClientDTO dto) {
 
         try {
             Client entity = clientRepositories.getReferenceById(id);
             CopyEntityToDto(entity, dto);
+            entity = clientRepositories.save(entity);
             return new ClientDTO(entity);
         }catch (EntityNotFoundException e) {
             throw new ResourceNotFoundException("recurso não encontrado");
@@ -91,7 +94,7 @@ public class ClientService {
         entity.setIncome(dto.getIncome());
         entity.setBirthDate(dto.getBirthDate());
         entity.setChildren(dto.getChildren());
-        entity = clientRepositories.save(entity);
+
 
 
     }
