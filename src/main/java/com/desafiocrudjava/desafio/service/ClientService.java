@@ -3,7 +3,11 @@ package com.desafiocrudjava.desafio.service;
 import com.desafiocrudjava.desafio.dto.ClientDTO;
 import com.desafiocrudjava.desafio.entities.Client;
 import com.desafiocrudjava.desafio.repositories.ClientRepositories;
+import com.desafiocrudjava.desafio.service.exceptions.DatabaseException;
+import com.desafiocrudjava.desafio.service.exceptions.ResourceNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,11 +24,15 @@ public class ClientService {
     @Transactional(readOnly = true)
     public ClientDTO findByid(Long id){
         Optional<Client> result = clientRepositories.findById(id);
-        Client client = result.get();
+        Client client =result.orElseThrow(()-> new ResourceNotFoundException("recurso não encontrado"));
 
         return new  ClientDTO(client);
 
     }
+
+
+
+
     @Transactional(readOnly = true)
     public Page<ClientDTO> findAll(Pageable pageable){
         Page<Client> result = clientRepositories.findAll(pageable);
@@ -44,14 +52,30 @@ public class ClientService {
 
     }
     public ClientDTO update (Long id, ClientDTO dto) {
-        Client entity =clientRepositories.getReferenceById(id);
-        CopyEntityToDto(entity, dto);
-        return new ClientDTO(entity);
 
+        try {
+            Client entity = clientRepositories.getReferenceById(id);
+            CopyEntityToDto(entity, dto);
+            return new ClientDTO(entity);
+        }catch (EntityNotFoundException e) {
+            throw new ResourceNotFoundException("recurso não encontrado");
+        }
     }
 
     public void  delete(Long id){
-        clientRepositories.deleteById(id);
+
+        if (!clientRepositories.existsById(id)){
+            throw  new ResourceNotFoundException(" recurso não encontrado");
+
+
+        }
+        try {
+            clientRepositories.deleteById(id);
+        } catch (DataIntegrityViolationException e){
+
+            throw  new DatabaseException("falha de integridade referencail");
+
+        }
     }
 
 

@@ -4,13 +4,16 @@ import com.desafiocrudjava.desafio.dto.ClientDTO;
 import com.desafiocrudjava.desafio.entities.Client;
 import com.desafiocrudjava.desafio.repositories.ClientRepositories;
 import com.desafiocrudjava.desafio.service.ClientService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.Optional;
 
 @RestController
@@ -32,9 +35,10 @@ public class ClientController {
         Page<ClientDTO> dto = clientService.findAll(pageable);
         return ResponseEntity.ok(dto);
     }
-    public  ResponseEntity<ClientDTO> insert(@RequestBody ClientDTO dto){
+    public  ResponseEntity<ClientDTO> insert(@Valid @RequestBody ClientDTO dto){
         dto=clientService.insert(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(dto.getId()).toUri();
+        return ResponseEntity.created(uri).body(dto);
 
     }
 
